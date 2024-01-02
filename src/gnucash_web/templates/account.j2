@@ -3,12 +3,11 @@
 
 {% block title %}{{ account.fullname or 'Accounts' | display }}{% endblock title %}
 
-{# Account layer navigator in navbar header #}
-{% block account_header %}
-  <div class="breadcrumb gnc-account-nav py-2 my-0 mx-4">
-    {% for parent_account in account | parentaccounts -%}
+{% block content %}
+    <div class="breadcrumb">
+        {% for parent_account in account | parentaccounts -%}
       {% if loop.first and loop.last -%}
-        <div class="breadcrumb-item active">All Accounts</div>
+        <div class="breadcrumb-item active"> {{ book.root_account.name | display  }}</div>
       {%- elif loop.last -%}
         <div class="breadcrumb-item active">{{ parent_account.name | display }}</div>
       {%- elif not loop.first -%}
@@ -17,12 +16,15 @@
            href="{{ parent_account | accounturl }}">
           {{ parent_account.name | display }}
         </a>
+      {%- elif loop.first -%}
+        <a class="breadcrumb-item link d-inline-block text-truncate"
+           style="max-width: 500px"
+           href="{{ book.root_account | accounturl }}">
+            {{ book.root_account.name | display  }}
+        </a>
       {%- endif -%}
     {%- endfor %}
-  </div>
-{% endblock account_header %}
-
-{% block content %}
+    </div>
   {% if account.parent %}
     <div id="total" class="my-3 list-group">
       <div class="list-group-item">
@@ -86,12 +88,12 @@
             <li class="page-item {% if page==1 %}disabled{% endif %}">
               <a class="page-link bi bi-caret-left" href="{{ account | accounturl(page=page-1) }}"></a>
             </li>
-            {% for p in range(1,num_pages+1) %}
+            {% for p in range(1, num_pages + 1) %}
               {# Display first, previous, current, next and last page explicitly, ellipsise rest. #}
               {# If a only a single page would be ellipsised, display it anyway. #}
-              {% if page-1 <= p and p <= page+1
-                 or p == page+2 and p+1 == num_pages
-                 or p == page-2 and p-1 == 1
+              {% if page-1 <= p and p <= page + 1
+                 or p == page + 2 and p + 1 == num_pages
+                 or p == page - 2 and p-1 == 1
                  or loop.first or loop.last %}
                 <li class="page-item {% if p==page %}active{% endif %}">
                   <a class="page-link" {% if p!=page %}href="{{ account | accounturl(page=p) }}"{% endif %}>
@@ -108,7 +110,7 @@
 
             {% endfor %}
             <li class="page-item {% if page==num_pages %}disabled{% endif %}">
-             <a class="page-link bi bi-caret-right" href="{{ account | accounturl(page=page+1) }}"></a>
+             <a class="page-link bi bi-caret-right" href="{{ account | accounturl(page=page + 1) }}"></a>
             </li>
           </ul>
         </nav>
