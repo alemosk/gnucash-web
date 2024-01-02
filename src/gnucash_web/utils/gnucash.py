@@ -69,6 +69,8 @@ def open_book(*args, **kwargs):
     except piecash.GnucashException as e:
         if "Lock on the file" in str(e):
             raise DatabaseLocked()
+        if "does not exist" in str(e):
+            raise AccessDenied
         else:
             raise e
 
