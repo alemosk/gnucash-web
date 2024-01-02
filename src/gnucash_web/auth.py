@@ -2,11 +2,11 @@ from functools import wraps
 
 from flask import Blueprint, render_template, url_for, request, redirect, session
 from flask import current_app as app
-from sqlalchemy.exc import OperationalError
 
 from .utils.gnucash import open_book, AccessDenied
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
 
 @bp.app_errorhandler(AccessDenied)
 def handle_account_not_found(e: AccessDenied):
@@ -16,11 +16,12 @@ def handle_account_not_found(e: AccessDenied):
 
 def get_db_credentials():
     if not app.config.AUTH_MECHANISM:
-        return (None, None)
+        return None, None
     elif app.config.AUTH_MECHANISM == 'passthrough':
-        return (session['username'], session['password'])
+        return session['username'], session['password']
     else:
         raise NotImplementedError('Only passthrough auth is currently supported')
+
 
 def authenticate(username, password):
     if not app.config.AUTH_MECHANISM:
@@ -40,6 +41,7 @@ def authenticate(username, password):
     else:
         raise NotImplementedError('Only passthrough auth is currently supported')
 
+
 def end_session():
     if not app.config.AUTH_MECHANISM:
         pass
@@ -49,6 +51,7 @@ def end_session():
         del session['password']
     else:
         raise NotImplementedError('Only passthrough auth is currently supported')
+
 
 def is_authenticated():
     return not app.config.AUTH_MECHANISM or 'username' in session
@@ -69,14 +72,15 @@ def requires_auth(func):
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-       authenticate(request.form['username'], request.form['password'])
-       session.permanent = True
-       return redirect(request.args.get('return_url') or url_for('.login'))
+        authenticate(request.form['username'], request.form['password'])
+        session.permanent = True
+        return redirect(request.args.get('return_url') or url_for('.login'))
     else:
         if is_authenticated():
             return render_template('user.j2', username=session.get('username', 'no one'))
         else:
             return render_template('login.j2')
+
 
 @bp.route('/logout', methods=['POST'])
 def logout():

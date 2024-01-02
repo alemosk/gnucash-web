@@ -1,6 +1,5 @@
 """Flask app for GnuCash Web."""
 import os
-from importlib import metadata
 
 from flask import Flask, redirect, url_for
 from flask.cli import FlaskGroup
@@ -11,6 +10,15 @@ from .utils import jinja as jinja_utils
 from .config import GnuCashWebConfig
 
 from encrypted_session import EncryptedSessionInterface
+
+
+def reverse_proxied(app):
+    def wrapper(environ, start_response):
+        scheme = environ.get('HTTP_X_FORWARDED_PROTO', '')
+        if scheme:
+            environ['wsgi.url_scheme'] = scheme
+        return app(environ, start_response)
+    return wrapper
 
 
 def create_app(test_config=None):
@@ -24,6 +32,7 @@ def create_app(test_config=None):
     """
     app = Flask('gnucash_web')
     app.config = GnuCashWebConfig(app)
+    app.wsgi_app = reverse_proxied(app.wsgi_app)
 
     if not app.debug:
         app.logger.setLevel(app.config.LOG_LEVEL)
