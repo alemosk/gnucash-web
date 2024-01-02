@@ -1,7 +1,7 @@
 """Flask app for GnuCash Web."""
 import os
 
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, send_from_directory
 from flask.cli import FlaskGroup
 import click
 
@@ -77,6 +77,10 @@ def create_app(test_config=None):
     def index():
         return redirect(url_for('book.show_account'))
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
     return app
 
 
