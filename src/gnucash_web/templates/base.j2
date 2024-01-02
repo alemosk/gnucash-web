@@ -37,6 +37,9 @@
                 <a class="nav-link" href="{{ url_for('book.show_account') }}">Accounts</a>
               {% endblock %}
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('about.about') }}">About</a>
+            </li>
           </ul>
 
           {% if is_authenticated() %}
@@ -55,16 +58,6 @@
     <main id="content" class="container">
       {% block content required %}{% endblock %}
     </main>
-
-    <footer class="footer mt-auto bg-light py-2 px-4 mt-7">
-      <div class="float-start">
-        <span class="text-muted">GnuCash Web v{{ pkg_version }} © Joshua Bachmeier (2023), GPLv3+</span>
-      </div>
-      <div class="float-end">
-        <a href="https://github.com/joshuabach/gnucash-web">GitHub</a>
-      </div>
-    </footer>
-
     {% block modals %}{% endblock %}
 
     <script src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>

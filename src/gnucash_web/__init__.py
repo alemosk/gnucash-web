@@ -5,7 +5,7 @@ from flask import Flask, redirect, url_for
 from flask.cli import FlaskGroup
 import click
 
-from . import auth, book, commodities
+from . import auth, book, commodities, about
 from .utils import jinja as jinja_utils
 from .config import GnuCashWebConfig
 
@@ -71,6 +71,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
     app.register_blueprint(book.bp)
     app.register_blueprint(commodities.bp)
+    app.register_blueprint(about.bp)
 
     @app.route('/')
     def index():
