@@ -2,7 +2,9 @@
 
 Mostly wrappers around piecash functions.
 """
+import datetime
 from contextlib import contextmanager
+from decimal import Decimal
 
 from werkzeug.exceptions import NotFound, Locked
 from flask import request
@@ -95,3 +97,18 @@ def get_account(book, *args, **kwargs):
         return book.accounts.get(*args, **kwargs)
     except KeyError:
         raise AccountNotFound(*args, **kwargs)
+
+
+def get_budget_amounts(book, account):
+    amounts = book.session.query(piecash.BudgetAmount).filter(piecash.BudgetAmount.account == account)
+
+    return amounts
+
+
+def get_total_in_current_month(account):
+    # draft
+    balance_at_end_of_month = Decimal(str(account.get_balance(
+        at_date=datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    )))
+
+    return account.get_balance() - balance_at_end_of_month

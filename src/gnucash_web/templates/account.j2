@@ -25,12 +25,28 @@
       {%- endif -%}
     {%- endfor %}
     </div>
+
+    {% for budget_amount in budget_amounts %}
+        {% if loop.first %}
+        <div class="my-3 list-group">
+        {% endif %}
+      <div class="list-group-item">
+        <b>{{ budget_amount.budget.name | display }}</b>
+        <span class="float-end">
+          {{ budget_amount.amount | money(account.commodity) }}
+            ({{ (budget_amount.amount - current_total) | money(account.commodity) }})
+        </span>
+      </div>
+        {% if loop.last %}
+    </div>
+        {% endif %}
+    {% endfor %}
   {% if account.parent %}
     <div id="total" class="my-3 list-group">
       <div class="list-group-item">
         <b>Total</b>
         <span class="float-end">
-          {{ account.get_balance() | money(account.commodity) }}
+          {{ account.get_balance() | money(account.commodity) }} ({{ current_total | money(account.commodity) }})
         </span>
       </div>
     </div>

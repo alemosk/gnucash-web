@@ -10,7 +10,9 @@ from piecash import Transaction, Split
 from werkzeug.exceptions import BadRequest
 
 from .auth import requires_auth, get_db_credentials
-from .utils.gnucash import open_book, get_account, AccountNotFound, DatabaseLocked
+from .utils.gnucash import (
+    open_book, get_account, AccountNotFound, DatabaseLocked, get_budget_amounts, get_total_in_current_month
+)
 from .utils.jinja import account_url
 
 bp = Blueprint("book", __name__, url_prefix="/book")
@@ -87,6 +89,9 @@ def show_account(account_name):
             else book.root_account
         )
 
+        budget_amounts = get_budget_amounts(book, account)
+        current_total = get_total_in_current_month(account)
+
         num_pages = max(1, ceil(len(account.splits) / app.config.TRANSACTION_PAGE_LENGTH))
         if page > num_pages:
             raise BadRequest(f'Invalid query parameter: not enough pages: {page} > {num_pages}')
@@ -98,6 +103,8 @@ def show_account(account_name):
             today=date.today(),
             num_pages=num_pages,
             page=page,
+            budget_amounts=budget_amounts,
+            current_total=current_total,
         )
 
 
