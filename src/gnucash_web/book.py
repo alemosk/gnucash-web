@@ -11,7 +11,8 @@ from werkzeug.exceptions import BadRequest
 
 from .auth import requires_auth, get_db_credentials
 from .utils.gnucash import (
-    open_book, get_account, AccountNotFound, DatabaseLocked, get_budget_amounts, get_total_in_current_month
+    open_book, get_account, AccountNotFound, DatabaseLocked, get_budget_amounts, get_total_in_current_month,
+    get_accounts
 )
 from .utils.jinja import account_url
 
@@ -283,3 +284,56 @@ def del_transaction():
         book.save()
 
         return redirect(account_url(account))
+
+
+def make_budget_report(account):
+    accounts = []
+    if account.children:
+        for children in account.children:
+            accounts.append(make_budget_report(children))
+
+    try:
+        budget_amount = account.budget_amounts(period_num=date.today().month - 1)
+    except KeyError:
+        budget_amount = None
+
+    total = get_total_in_current_month(account)
+    budget = budget_amount.amount if budget_amount else None
+    if account.type in [
+        'EXPENSE',
+        'LIABILITY',
+        # 'BANK',
+        'CREDIT',
+        # 'CASH',
+        # 'ASSET',
+        # 'INCOME',
+    ]:
+       left = budget - total if budget else ''
+    else:
+       left = budget + total if budget else ''
+    result = {
+        'name': account.name,
+        'children': accounts,
+        'total': total,
+        'budget': budget if budget is not None else '',
+        'left': left,
+        'date': date.today().replace(day=1)
+    }
+
+    return result
+
+
+@bp.route("/budget/")
+@requires_auth
+def show_budget():
+    with open_book(
+        uri_conn=app.config.DB_URI(*get_db_credentials()),
+        open_if_lock=True,
+        readonly=True,
+    ) as book:
+        report = make_budget_report(book.root_account)
+
+    return render_template(
+        "budget.j2",
+        account=report,
+    )

@@ -99,10 +99,19 @@ def get_account(book, *args, **kwargs):
         raise AccountNotFound(*args, **kwargs)
 
 
-def get_budget_amounts(book, account):
-    amounts = book.session.query(piecash.BudgetAmount).filter(piecash.BudgetAmount.account == account)
+def get_budget_amounts(book, account=None):
+    qs = book.session.query(piecash.BudgetAmount)
 
-    return amounts
+    if account:
+        qs = qs.filter(piecash.BudgetAmount.account == account)
+
+    return qs
+
+
+def get_accounts(book):
+    qs = book.session.query(piecash.Account)
+
+    return qs
 
 
 def get_total_in_current_month(account):

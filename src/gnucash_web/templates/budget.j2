@@ -1,0 +1,61 @@
+{% extends 'base.j2' %}
+
+{% block content %}
+    <style>
+.tree-list {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.tree-list .content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tree-list .right-columns {
+    display: flex;
+    width: 210px;
+}
+
+.tree-list .right-column {
+    flex-grow: 1;
+    text-align: right;
+    width: 70px;
+}
+    </style>
+    <ul class="tree-list">
+        <li>
+        <div class="content">
+            <span>
+             <b>Account</b>
+            </span>
+            <div class="right-columns">
+                <span class="right-column"><b>Used</b></span>
+                <span class="right-column"><b>Budget</b></span>
+                <span class="right-column"><b>Left</b></span>
+            </div>
+        </div>
+        {% if children %}
+            <ul>{{ loop(children) }}</ul>
+        {% endif %}
+    </li>
+        {% for account in account.children |sort(attribute='name') recursive %}
+            {% set children = account.children %}
+            <li>
+                <div class="content">
+                    <span>
+                      {{ account.name }}
+                    </span>
+                    <div class="right-columns">
+                        <span class="right-column">{{ account.total }}</span>
+                        <span class="right-column">{{ account.budget }}</span>
+                        <span class="right-column">{{ account.left }}</span>
+                    </div>
+                </div>
+                {% if children %}
+                    <ul>{{ loop(children) }}</ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
